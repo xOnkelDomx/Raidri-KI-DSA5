@@ -1,10 +1,13 @@
 {
   "id": "raidri-ki-dsa5",
   "title": "Raidri-KI-DSA5",
-  "description": "Kampf-KI für das DSA5-System in FoundryVTT.",
+  "description": "Ein KI-Modul zur automatisierten Steuerung von DSA5-NPCs in Foundry VTT. Unterstützt Sicht, Bewegung und Nahkampfangriffe.",
   "version": "0.1.0",
   "authors": [
-    { "name": "DeinName", "discord": "" }
+    {
+      "name": "OnkelDom",
+      "discord": "OnkelDom"
+    }
   ],
   "compatibility": {
     "minimum": "12",
@@ -18,9 +21,23 @@
   "scripts": [],
   "languages": [],
   "packs": [],
-  "url": "https://github.com/deinname/raidri-ki-dsa5",
-  "manifest": "https://github.com/deinname/raidri-ki-dsa5/releases/latest/download/module.json",
-  "download": "https://github.com/deinname/raidri-ki-dsa5/releases/latest/download/raidri-ki-dsa5.zip",
+  "url": "https://github.com/xOnkelDomx/Raidri-KI-DSA5",
+  "manifest": "https://raw.githubusercontent.com/xOnkelDomx/Raidri-KI-DSA5/main/module.json",
+  "download": "https://github.com/xOnkelDomx/Raidri-KI-DSA5/releases/latest/download/Raidri-KI-DSA5.zip",
   "license": "MIT",
-  "readme": "README.md"
+  "readme": "README.md",
+  "relationships": {
+    "systems": [
+      {
+        "id": "dsa5",
+        "type": "system"
+      }
+    ],
+    "requires": [
+      {
+        "id": "lib-find-the-path-12",
+        "type": "module"
+      }
+    ]
+  }
 }
