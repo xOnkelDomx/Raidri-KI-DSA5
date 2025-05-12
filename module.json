@@ -1,0 +1,26 @@
+{
+  "id": "raidri-ki-dsa5",
+  "title": "Raidri-KI-DSA5",
+  "description": "Kampf-KI für das DSA5-System in FoundryVTT.",
+  "version": "0.1.0",
+  "authors": [
+    { "name": "DeinName", "discord": "" }
+  ],
+  "compatibility": {
+    "minimum": "12",
+    "verified": "12.331",
+    "maximum": "13"
+  },
+  "esmodules": [
+    "scripts/main.js"
+  ],
+  "styles": [],
+  "scripts": [],
+  "languages": [],
+  "packs": [],
+  "url": "https://github.com/deinname/raidri-ki-dsa5",
+  "manifest": "https://github.com/deinname/raidri-ki-dsa5/releases/latest/download/module.json",
+  "download": "https://github.com/deinname/raidri-ki-dsa5/releases/latest/download/raidri-ki-dsa5.zip",
+  "license": "MIT",
+  "readme": "README.md"
+}

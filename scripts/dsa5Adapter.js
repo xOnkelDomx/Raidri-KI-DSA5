@@ -1,0 +1,1 @@
+// Zugriff auf DSA5-spezifische Actor-/Item-Daten

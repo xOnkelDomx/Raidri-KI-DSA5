@@ -1,0 +1,1 @@
+// Konfigurierbare Einstellungen für das Modul
