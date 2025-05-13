@@ -18,17 +18,28 @@ export async function runNpcTurn(token) {
 
   const target = enemies[0];
 
+  // PathManager holen
+  const manager = game.FindThePath.Chebyshev?.PathManager;
+  if (!manager) {
+    console.warn("Raidri-KI | Kein PathManager verfügbar.");
+    return;
+  }
+
+  // Debug: Pfad zum Ziel anzeigen
+  const fullPath = manager.path(token.id, target.id);
+  console.log("Raidri-KI | Pfad zum Ziel:", fullPath);
+
   // Kompatibler Distanz-Check
   let dist;
   if (canvas.grid.measurePath) {
     const pathCheck = canvas.grid.measurePath({
-      origin: token.getCenter(token.x, token.y),
-      target: target.getCenter(target.x, target.y),
+      origin: token.getCenterPoint({ x: token.x, y: token.y }),
+      target: target.getCenterPoint({ x: target.x, y: target.y }),
       type: "move"
     });
     dist = pathCheck?.totalDistance ?? 0;
   } else {
-    dist = canvas.grid.measureDistance(token, target);
+    dist = canvas.grid.measureDistance(token.getCenter(), target.getCenter());
   }
 
   if (dist <= canvas.grid.size) {
@@ -38,13 +49,9 @@ export async function runNpcTurn(token) {
   }
 
   const movement = token.actor.system.status.speed?.value || 4;
-  const manager = game.FindThePath.Chebyshev?.PathManager;
-  if (!manager) {
-    console.warn("Raidri-KI | Kein PathManager verfügbar.");
-    return;
-  }
 
   const reachable = await manager.pointsWithinRangeOfToken(token, movement);
+  console.log("Raidri-KI | Erreichbare Punkte:", reachable);
   if (!reachable?.length) {
     console.warn("Raidri-KI | Keine erreichbaren Punkte.");
     return;
