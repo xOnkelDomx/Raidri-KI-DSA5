@@ -18,9 +18,9 @@ export async function runNpcTurn(token) {
   }
 
   const target = enemies[0];
-
   const movement = token.actor.system.status.speed?.value || 4;
   const manager = game.FindThePath?.Chebyshev?.PathManager;
+
   if (!manager) {
     console.warn("Raidri-KI | Kein PathManager verfügbar.");
     return;
