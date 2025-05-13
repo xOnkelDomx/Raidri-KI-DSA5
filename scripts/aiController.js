@@ -1,5 +1,6 @@
-import { getVisibleEnemies, isTokenEnemy } from "./dsa5Adapter.js";
+import { getVisibleEnemies } from "./dsa5Adapter.js";
 import { performAttack } from "./dsa5Adapter.js";
+import { debugLog } from "./settings.js";
 
 /**
  * Führt einen vollständigen NPC-Zug aus
@@ -17,6 +18,16 @@ export async function runNpcTurn(token) {
   }
 
   const target = enemies[0];
+
+  const movement = token.actor.system.status.speed?.value || 4;
+  const manager = game.FindThePath?.Chebyshev?.PathManager;
+  if (!manager) {
+    console.warn("Raidri-KI | Kein PathManager verfügbar.");
+    return;
+  }
+
+  const fullPath = manager.path(token.id, target.id);
+  debugLog("Pfad zum Ziel:", fullPath);
 
   // Kompatibler Distanz-Check
   let dist;
@@ -37,19 +48,9 @@ export async function runNpcTurn(token) {
     return;
   }
 
-  const movement = token.actor.system.status.speed?.value || 4;
-  const manager = game.FindThePath.Chebyshev?.PathManager;
-  if (!manager) {
-    console.warn("Raidri-KI | Kein PathManager verfügbar.");
-    return;
-  }
-
-  // Debug-Ausgabe des Pfads
-  const fullPath = manager.path(token.id, target.id);
-  console.log("Raidri-KI | Pfad zum Ziel:", fullPath);
-
   const reachable = await manager.pointsWithinRangeOfToken(token, movement);
-  console.log("Raidri-KI | Erreichbare Punkte:", reachable);
+  debugLog("Erreichbare Punkte:", reachable);
+
   if (!reachable?.length) {
     console.warn("Raidri-KI | Keine erreichbaren Punkte.");
     return;
@@ -91,11 +92,9 @@ export async function runNpcTurn(token) {
     return;
   }
 
-  // Pfad anzeigen
   manager.drawPath(token.id, target.id);
   await new Promise(resolve => setTimeout(resolve, 500));
 
-  // Bewegung + Pfad ausblenden
   await token.document.update({ x: best.point.px, y: best.point.py });
   manager.clearPath(token.id);
 
