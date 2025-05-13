@@ -10,27 +10,25 @@ export async function runNpcTurn(token) {
 
   console.log("Raidri-KI | Starte NPC-Zug für:", token.name);
 
-  // 1. Sichtprüfung
   const enemies = getVisibleEnemies(token);
   if (!enemies.length) {
     console.log("Raidri-KI | Keine Feinde sichtbar.");
     return;
   }
 
-  // 2. Nächstes Ziel bestimmen
-  const target = enemies[0]; // TODO: bessere Auswahl (z. B. nach Distanz)
+  const target = enemies[0];
 
-  // 🧠 NEU: Bereits angrenzend? Dann direkt angreifen
+  // Kompatibler Distanz-Check
   let dist;
   if (canvas.grid.measurePath) {
     const pathCheck = canvas.grid.measurePath({
-      origin: token.center,
-      target: target.center,
+      origin: token.getCenter(token.x, token.y),
+      target: target.getCenter(target.x, target.y),
       type: "move"
     });
     dist = pathCheck?.totalDistance ?? 0;
   } else {
-    dist = canvas.grid.measureDistance(token.center, target.center);
+    dist = canvas.grid.measureDistance(token, target);
   }
 
   if (dist <= canvas.grid.size) {
@@ -39,10 +37,7 @@ export async function runNpcTurn(token) {
     return;
   }
 
-  // 3. Maximale Bewegungsreichweite ermitteln
   const movement = token.actor.system.status.speed?.value || 4;
-
-  // 4. Beste erreichbare angrenzende Position zum Ziel finden
   const manager = game.FindThePath.Chebyshev?.PathManager;
   if (!manager) {
     console.warn("Raidri-KI | Kein PathManager verfügbar.");
@@ -55,7 +50,6 @@ export async function runNpcTurn(token) {
     return;
   }
 
-  // Zielpunkt: angrenzend zu Ziel
   const gridSize = canvas.grid.size;
   const targetX = target.x;
   const targetY = target.y;
@@ -71,7 +65,6 @@ export async function runNpcTurn(token) {
     { x: targetX + gridSize, y: targetY + gridSize }
   ];
 
-  // Wähle den besten erreichbaren angrenzenden Punkt
   let best = null;
   let minDist = Infinity;
 
@@ -93,11 +86,14 @@ export async function runNpcTurn(token) {
     return;
   }
 
-  // 5. Bewege den Token zum besten Punkt
+  // Pfad anzeigen
+  manager.drawPath(token.id, target.id);
+  await new Promise(resolve => setTimeout(resolve, 500));
+
+  // Bewegung + Pfad ausblenden
   await token.document.update({ x: best.point.px, y: best.point.py });
+  manager.clearPath(token.id);
 
-  // 6. Angriff ausführen
   await performAttack(token, target);
-
   console.log("Raidri-KI | Zug abgeschlossen.");
 }

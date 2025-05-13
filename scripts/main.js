@@ -4,10 +4,16 @@ import { registerSettings } from "./settings.js";
 // Entry point: register hooks and settings
 Hooks.once('init', () => {
   console.log('⚔️ Raidri-KI-DSA5 | Initialisierung...');
-  registerSettings(); // Debug-Einstellung registrieren
+  registerSettings();
 });
 
 Hooks.once("ready", () => {
+  // Sicherstellen, dass lib-find-the-path-12 vorhanden ist
+  if (!game.modules.get("lib-find-the-path-12")?.active) {
+    ui.notifications.error("Raidri-KI benötigt 'lib-find-the-path-12'. Bitte installieren und aktivieren.");
+    return;
+  }
+
   window.addEventListener("keydown", async (event) => {
     // Taste G (nur wenn kein Texteingabefeld aktiv ist)
     if (
@@ -22,13 +28,7 @@ Hooks.once("ready", () => {
       }
 
       ui.notifications.info(`Raidri-KI: ${token.name} führt Zug aus...`);
-
       await runNpcTurn(token);
-
-      await ChatMessage.create({
-        content: `<div><strong>🤖 Raidri-KI:</strong> ${token.name} hat seinen Zug abgeschlossen.</div>`,
-        speaker: ChatMessage.getSpeaker({ token })
-      });
     }
   });
 
