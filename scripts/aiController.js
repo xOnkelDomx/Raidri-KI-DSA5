@@ -18,9 +18,9 @@ export async function runNpcTurn(token) {
   }
 
   const target = enemies[0];
+
   const movement = token.actor.system.status.speed?.value || 4;
   const manager = game.FindThePath?.Chebyshev?.PathManager;
-
   if (!manager) {
     console.warn("Raidri-KI | Kein PathManager verfügbar.");
     return;
@@ -31,10 +31,10 @@ export async function runNpcTurn(token) {
 
   // Kompatibler Distanz-Check
   let dist;
-  if (canvas.grid.measurePath) {
+  if (typeof canvas.grid.measurePath === "function") {
     const pathCheck = canvas.grid.measurePath({
-      origin: token.getCenterPoint({ x: token.x, y: token.y }),
-      target: target.getCenterPoint({ x: target.x, y: target.y }),
+      origin: token.getCenterPoint(),
+      target: target.getCenterPoint(),
       type: "move"
     });
     dist = pathCheck?.totalDistance ?? 0;
