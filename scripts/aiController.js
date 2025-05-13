@@ -21,7 +21,13 @@ export async function runNpcTurn(token) {
   const target = enemies[0]; // TODO: bessere Auswahl (z. B. nach Distanz)
 
   // 🧠 NEU: Bereits angrenzend? Dann direkt angreifen
-  const dist = canvas.grid.measureDistance(token.center, target.center);
+  const pathCheck = canvas.grid.measurePath({
+    origin: token.center,
+    target: target.center,
+    type: "move"
+  });
+  const dist = pathCheck?.totalDistance ?? 0;
+
   if (dist <= canvas.grid.size) {
     console.log("Raidri-KI | Bereits angrenzend zum Ziel – kein Weg nötig.");
     await performAttack(token, target);
