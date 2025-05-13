@@ -1,6 +1,4 @@
-// Hier entsteht die zentrale KI-Logik
 import { getVisibleEnemies, isTokenEnemy } from "./dsa5Adapter.js";
-import { findPathToToken } from "./pathingHelper.js";
 import { performAttack } from "./dsa5Adapter.js";
 
 /**
@@ -22,18 +20,72 @@ export async function runNpcTurn(token) {
   // 2. Nächstes Ziel bestimmen
   const target = enemies[0]; // TODO: bessere Auswahl (z. B. nach Distanz)
 
-  // 3. Pfad zum Ziel berechnen
-  const path = await findPathToToken(token, target);
-  if (!path || !path.length) {
-    console.warn("Raidri-KI | Kein Pfad gefunden.");
+  // 🧠 NEU: Bereits angrenzend? Dann direkt angreifen
+  const dist = canvas.grid.measureDistance(token.center, target.center);
+  if (dist <= canvas.grid.size) {
+    console.log("Raidri-KI | Bereits angrenzend zum Ziel – kein Weg nötig.");
+    await performAttack(token, target);
     return;
   }
 
-  // 4. Token bewegen (nur erstes Feld für Demo)
-  const firstStep = path[0];
-  await token.document.update({ x: firstStep.point.px, y: firstStep.point.py });
+  // 3. Maximale Bewegungsreichweite ermitteln
+  const movement = token.actor.system.status.speed?.value || 4;
 
-  // 5. Angriff ausführen
+  // 4. Beste erreichbare angrenzende Position zum Ziel finden
+  const manager = game.FindThePath.Chebyshev?.PathManager;
+  if (!manager) {
+    console.warn("Raidri-KI | Kein PathManager verfügbar.");
+    return;
+  }
+
+  const reachable = await manager.pointsWithinRangeOfToken(token, movement);
+  if (!reachable?.length) {
+    console.warn("Raidri-KI | Keine erreichbaren Punkte.");
+    return;
+  }
+
+  // Zielpunkt: angrenzend zu Ziel
+  const gridSize = canvas.grid.size;
+  const targetX = target.x;
+  const targetY = target.y;
+
+  const adjacent = [
+    { x: targetX - gridSize, y: targetY },
+    { x: targetX + gridSize, y: targetY },
+    { x: targetX, y: targetY - gridSize },
+    { x: targetX, y: targetY + gridSize },
+    { x: targetX - gridSize, y: targetY - gridSize },
+    { x: targetX + gridSize, y: targetY - gridSize },
+    { x: targetX - gridSize, y: targetY + gridSize },
+    { x: targetX + gridSize, y: targetY + gridSize }
+  ];
+
+  // Wähle den besten erreichbaren angrenzenden Punkt
+  let best = null;
+  let minDist = Infinity;
+
+  for (let r of reachable) {
+    for (let a of adjacent) {
+      const d = Math.hypot(r.segment.point.px - a.x, r.segment.point.py - a.y);
+      if (d < gridSize / 2) {
+        const distToTarget = r.dist;
+        if (distToTarget < minDist) {
+          minDist = distToTarget;
+          best = r.segment;
+        }
+      }
+    }
+  }
+
+  if (!best) {
+    console.warn("Raidri-KI | Kein angrenzender Punkt erreichbar.");
+    return;
+  }
+
+  // 5. Bewege den Token zum besten Punkt
+  await token.document.update({ x: best.point.px, y: best.point.py });
+
+  // 6. Angriff ausführen
   await performAttack(token, target);
 
   console.log("Raidri-KI | Zug abgeschlossen.");

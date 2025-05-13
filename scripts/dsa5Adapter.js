@@ -9,7 +9,7 @@ export function getVisibleEnemies(token) {
       t !== token &&
       !t.document.hidden &&
       isTokenEnemy(token, t) &&
-      token.canSee(t)
+      canvas.effects.visibility.testVisibility(t)
     );
   }
   
