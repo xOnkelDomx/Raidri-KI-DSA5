@@ -29,14 +29,11 @@ export async function runNpcTurn(token) {
   const fullPath = manager.path(token.id, target.id);
   debugLog("Pfad zum Ziel:", fullPath);
 
-  // Kompatibler Distanz-Check
+  // Kompatibler Distanz-Check mit korrektem Ray-Objekt
   let dist;
   if (typeof canvas.grid.measurePath === "function") {
-    const pathCheck = canvas.grid.measurePath({
-      origin: token.getCenterPoint(),
-      target: target.getCenterPoint(),
-      type: "move"
-    });
+    const ray = new Ray(token.getCenter(), target.getCenter());
+    const pathCheck = canvas.grid.measurePath(ray);
     dist = pathCheck?.totalDistance ?? 0;
   } else {
     dist = canvas.grid.measureDistance(token.getCenter(), target.getCenter());
