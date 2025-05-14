@@ -18,9 +18,9 @@ export async function runNpcTurn(token) {
   }
 
   const target = enemies[0];
-
   const movement = token.actor.system.status.speed?.value || 4;
   const manager = game.FindThePath?.Chebyshev?.PathManager;
+
   if (!manager) {
     console.warn("Raidri-KI | Kein PathManager verfügbar.");
     return;
@@ -29,14 +29,15 @@ export async function runNpcTurn(token) {
   const fullPath = manager.path(token.id, target.id);
   debugLog("Pfad zum Ziel:", fullPath);
 
-  // Kompatibler Distanz-Check mit korrektem Ray-Objekt
+  // Verwende Ray für kompatible Pfadmessung
   let dist;
-  if (typeof canvas.grid.measurePath === "function") {
-    const ray = new Ray(token.getCenter(), target.getCenter());
+  try {
+    const ray = new Ray(token.getCenterPoint(), target.getCenterPoint());
     const pathCheck = canvas.grid.measurePath(ray);
     dist = pathCheck?.totalDistance ?? 0;
-  } else {
-    dist = canvas.grid.measureDistance(token.getCenter(), target.getCenter());
+  } catch (err) {
+    console.error("Raidri-KI | Fehler bei Pfadmessung:", err);
+    return;
   }
 
   if (dist <= canvas.grid.size) {
