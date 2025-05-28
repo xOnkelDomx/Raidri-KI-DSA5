@@ -17,6 +17,7 @@ export function registerSettings() {
 
 /**
  * Gibt Debug-Logs aus, wenn aktiviert
+ * @param  {...any} args - Inhalte, die geloggt werden sollen
  */
 export function debugLog(...args) {
   if (game.settings.get(MODULE_ID, "enableDebug")) {

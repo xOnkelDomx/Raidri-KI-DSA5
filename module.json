@@ -2,7 +2,7 @@
   "id": "raidri-ki-dsa5",
   "title": "Raidri-KI-DSA5",
   "description": "Ein KI-Modul zur automatisierten Steuerung von DSA5-NPCs in Foundry VTT. Unterstützt Sicht, Bewegung und Nahkampfangriffe.",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "authors": [
     {
       "name": "OnkelDom",
@@ -15,7 +15,14 @@
     "maximum": "13"
   },
   "esmodules": [
-    "scripts/main.js"
+    "scripts/main.js",
+    "scripts/aiController.js",
+    "scripts/dsa5Adapter.js",
+    "scripts/pathingHelper.js",
+    "scripts/settings.js",
+    "scripts/lib/pathManager.js",
+    "scripts/lib/point.js",
+    "scripts/lib/utility.js"
   ],
   "styles": [],
   "scripts": [],
