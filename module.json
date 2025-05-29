@@ -1,8 +1,8 @@
 {
-  "id": "raidri-ki-dsa5",
-  "title": "Raidri-KI-DSA5",
-  "description": "Ein KI-Modul zur automatisierten Steuerung von DSA5-NPCs in Foundry VTT. Unterstützt Sicht, Bewegung und Nahkampfangriffe.",
-  "version": "0.1.1",
+  "id": "raidri-ki",
+  "title": "Raidri-KI (systemübergreifend)",
+  "description": "Ein KI-Modul zur automatisierten Steuerung von NPCs in Foundry VTT. Unterstützt Sicht, Bewegung, Vorschau und Nahkampfangriffe für DSA5, D&D5e und SWADE.",
+  "version": "0.1.2",
   "authors": [
     {
       "name": "OnkelDom",
@@ -17,7 +17,10 @@
   "esmodules": [
     "scripts/main.js",
     "scripts/aiController.js",
-    "scripts/dsa5Adapter.js",
+    "scripts/systemAdapter.js",
+    "scripts/adapter-dsa5.js",
+    "scripts/adapter-dnd5e.js",
+    "scripts/adapter-swade.js",
     "scripts/pathingHelper.js",
     "scripts/settings.js",
     "scripts/lib/pathManager.js",
@@ -35,10 +38,9 @@
   "readme": "README.md",
   "relationships": {
     "systems": [
-      {
-        "id": "dsa5",
-        "type": "system"
-      }
+      { "id": "dsa5", "type": "system" },
+      { "id": "dnd5e", "type": "system" },
+      { "id": "swade", "type": "system" }
     ],
     "requires": [
       {

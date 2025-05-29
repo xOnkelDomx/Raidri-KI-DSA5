@@ -1,5 +1,4 @@
-import { getVisibleEnemies } from "./dsa5Adapter.js";
-import { performAttack } from "./dsa5Adapter.js";
+import * as Adapter from "./systemAdapter.js";
 import { debugLog } from "./settings.js";
 import { PointFactory } from "./lib/point.js";
 import { FTPUtility } from "./lib/utility.js";
@@ -9,11 +8,11 @@ import { PathManager } from "./lib/pathManager.js";
  * Wählt den am besten erreichbaren, nächsten Feind
  */
 export async function findBestTarget(token) {
-  const enemies = getVisibleEnemies(token);
+  const enemies = Adapter.getVisibleEnemies(token);
   if (!enemies.length) return null;
 
   const origin = new PointFactory().segmentFromToken(token);
-  const movement = token.actor.system?.status?.speed?.value || 4;
+  const movement = Adapter.getMovementValue(token);
 
   const reachableTargets = [];
 
@@ -39,7 +38,7 @@ export async function findBestTarget(token) {
 export async function moveAdjacentToTarget(token, target) {
   const origin = new PointFactory().segmentFromToken(token);
   const targetSeg = new PointFactory().segmentFromToken(target);
-  const movement = token.actor.system?.status?.speed?.value || 4;
+  const movement = Adapter.getMovementValue(token);
 
   const neighbors = targetSeg.point.neighbors()
     .map(p => PointFactory.segmentFromPoint(p, origin.width, origin.height))
@@ -77,7 +76,7 @@ export async function runNpcTurn(token) {
   const dist = canvas.grid.measureDistance(token.getCenter(), target.getCenter());
   if (dist <= canvas.grid.size) {
     console.log("Raidri-KI | Ziel ist angrenzend – Angriff direkt.");
-    await performAttack(token, target);
+    await Adapter.performAttack(token, target);
     return;
   }
 
@@ -87,6 +86,6 @@ export async function runNpcTurn(token) {
     return;
   }
 
-  await performAttack(token, target);
+  await Adapter.performAttack(token, target);
   console.log("Raidri-KI | Zug abgeschlossen.");
 }

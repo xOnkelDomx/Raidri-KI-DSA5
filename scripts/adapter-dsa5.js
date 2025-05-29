@@ -22,6 +22,15 @@ export function isTokenEnemy(a, b) {
 }
 
 /**
+ * Gibt den Bewegungswert eines Tokens zurück, angepasst für DSA5
+ * @param {Token} token
+ * @returns {number}
+ */
+export function getMovementValue(token) {
+  return token.actor?.system?.status?.speed?.value ?? 4;
+}
+
+/**
  * Führt einen Standard-Nahkampfangriff durch
  * @returns {boolean} true bei Treffer, false bei Fehlschlag
  */
