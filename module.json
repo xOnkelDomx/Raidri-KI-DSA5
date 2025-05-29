@@ -41,12 +41,6 @@
       { "id": "dsa5", "type": "system" },
       { "id": "dnd5e", "type": "system" },
       { "id": "swade", "type": "system" }
-    ],
-    "requires": [
-      {
-        "id": "lib-find-the-path-12",
-        "type": "module"
-      }
     ]
   }
 }

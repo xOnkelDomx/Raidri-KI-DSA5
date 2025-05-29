@@ -11,13 +11,13 @@ export class FTPUtility
 		this.collisionConfig = data_?.collisionConfig ? data_.collisionConfig
 							      : this.defaultCollisionConfig ();
 		this._name = data_?.name ? data_.name : this.defaultName ();
-		canvas.grid.addHighlightLayer(this._name);
+		canvas.interface.grid.addHighlightLayer(this._name);
 	}
 
 	defaultCollisionConfig () { return { checkCollision: true, whitelist: new Array () }; }
 	defaultName () { return "FTPUtility"; }
 
-	clearHighlights () { canvas.grid.highlightLayers[this._name]?.clear (); }
+	clearHighlights () { canvas.interface.grid.highlightLayers[this._name]?.clear (); }
 
 	collision (newSegment_, collisionConfig_ = this.collisionConfig)
 	{
@@ -57,15 +57,11 @@ export class FTPUtility
 		return false;
 	}
 
-	// Checks if a token could be moved from oldSegment_ to newSegment_
 	isTraversable (oldSegment_, newSegment_, collisionConfig_ = this.collisionConfig)
 	{
 		return ! this.collision (newSegment_, collisionConfig_) && this.los (oldSegment_, newSegment_);
 	}
-	
-	/*
-		@points_ An Array of Point objects
-	*/
+
 	highlightPoints (points_, config_ = { "data": {}, "retain": false })
 	{
 		if (! config_.retain)
@@ -86,6 +82,7 @@ export class FTPUtility
 		for (let point of pointOverlap.keys ())
 			canvas.grid.highlightPosition(this._name, { x: point.px, y: point.py });
 	}
+
 	highlightSegments (segs_, config_ = { "data": {} })
 	{
 		let uniquePoints = new Map ();
@@ -93,6 +90,11 @@ export class FTPUtility
 
 		for (let seg of segs_)
 		{
+			if (!seg?.pointSet) {
+				console.warn("Raidri-KI | Segment ohne pointSet:", seg);
+				continue;
+			}
+
 			if (uniquePoints.has (seg.id))
 				continue;
 
@@ -103,7 +105,6 @@ export class FTPUtility
 
 		return this.highlightPoints (points, config_);
 	}
-
 	// Assumes that oldSegment_ and newSegment_ have the same dimensions!
 	los (oldSegment_, newSegment_)
 	{
@@ -125,7 +126,6 @@ export class FTPUtility
 		const ps1 = oldSegment_.pointSet;
 		const ps2 = newSegment_.pointSet;
 
-		// A token may take up multiple tiles, and it moves by translation from an old set to a new set. A movement is valid if, for each translation, the old tile has line of sight on the new tile and each tile in the new set has los on every other tile in the set.
 		for (let i = 0; i < oldSegment_.width * oldSegment_.height; ++i)
 		{		
 			if (CONFIG.Canvas.polygonBackends.sight.testCollision(
@@ -137,7 +137,6 @@ export class FTPUtility
 	
 			const p = { x: ps2[i].cpx, y: ps2[i].cpy };
 
-			// If A has los on B then B has los on A, so we only need to check half of these
 			for (let j = i + 1; j < newSegment_.width * newSegment_.height; ++j)
 				if (CONFIG.Canvas.polygonBackends.sight.testCollision(
 					p,
@@ -150,8 +149,6 @@ export class FTPUtility
 		return true;
 	}
 	
-	// Checks line of sight between the centers of two segments
-	// Returns true if los is not blocked by a wall
 	losCenter (startSegment_, endSegment_)
 	{
 		if (! startSegment_ || startSegment_.equals (endSegment_)) 
@@ -199,17 +196,13 @@ export class FTPUtility
 		if (segment_.equals (cur))
 			return true;
 
-		// Check if rotation is disabled
 		if (!this.tokenDoc.lockRotation) {
-			// Calculate the angular distance to the destination grid space
 			const dTheta = cur.radialDistToSegment (segment_, this.tokenDoc.rotation, AngleTypes.DEG);
 
 			if (dTheta)
 			{
-				// Rotate the token to face the direction it moves in
 				await this.tokenDoc.update ({ rotation: (this.tokenDoc.rotation + dTheta) % 360 }).then (
 				(resolve, reject) => { 
-					// Wait between rotating and moving
 					return new Promise (resolve => setTimeout (resolve, dTheta / 360 * rotateWait_));
 				});
 			}
@@ -219,43 +212,36 @@ export class FTPUtility
 
 		await this.tokenDoc.update ({ x: segment_.point.px, y: segment_.point.py }).catch (err => {
 			ui.notifications.warn (err);
-			// It really isn't
 			ok = false;
 		});
 
 		return ok;
 	}
-
 	async traverse (distFromEnd_ = 0, rotateWait_ = 100, moveWait_ = 250)
 	{
 		if (! this.path || ! this.path instanceof Path || ! this.path.valid)
 			return false;
-		// Redundant?
 		if (this.path.length === 0)
 			return false;
 		if (rotateWait_ < 0 || moveWait_ < 0)
 			return false;
 
-		// Make sure the token still exists
 		const token = canvas.tokens.get (this.path.token?.document.id);
 
 		if (! token)
 			return false;
 
-		// Make sure the token is where we think it is
 		const pf = new PointFactory (this.path.path[0].metric);
 		const start = pf.fromToken (token);
 
 		if (! start.equals (this.path.path[0].origin))
 			return false;
 
-		// Fail if the path doesn't get as close as we want
 		if (this.path.terminus.distToDest > distFromEnd_)
 			return false;
 
 		const pathToTraverse = this.path.within (distFromEnd_);
 
-		// pathToTraverse[i = 0] is the current point
 		for (let i = 1; i < pathToTraverse.length; ++i)
 		{
 			const success = await this.moveTokenToSegment (pathToTraverse[i], rotateWait_)
@@ -269,7 +255,6 @@ export class FTPUtility
 				return false;
 			}
 
-			// Wait between moves
 			if (i !== pathToTraverse.length - 1)
 				await new Promise (resolve => setTimeout (resolve, moveWait_));
 		}
@@ -283,7 +268,7 @@ export class FTPUtility
 	set token (token_)
 	{
 		this._token = token_;
-		this._tokenDoc = token_.document;
+		this._tokenDoc = token_?.document;
 	}
 	get tokenDoc () { return this._tokenDoc; }
 	set tokenDoc(tokenDoc_) { this._tokenDoc = tokenDoc_; }
